@@ -57,15 +57,23 @@ def load_config():
     
     # Versuche config.py zu importieren
     try:
-        import config
+        import config as config_module
         
         # Lade Werte aus config.py
-        config_vars = ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'DOCTORS', 
-                      'UPCOMING_DAYS', 'NOTIFY_HOURLY', 'REQUEST_DELAY', 'TIMEOUT']
-        
-        for key in config_vars:
-            if hasattr(config, key):
-                config[key] = getattr(config, key)
+        if hasattr(config_module, 'TELEGRAM_BOT_TOKEN'):
+            config['TELEGRAM_BOT_TOKEN'] = config_module.TELEGRAM_BOT_TOKEN
+        if hasattr(config_module, 'TELEGRAM_CHAT_ID'):
+            config['TELEGRAM_CHAT_ID'] = config_module.TELEGRAM_CHAT_ID
+        if hasattr(config_module, 'DOCTORS'):
+            config['DOCTORS'] = config_module.DOCTORS
+        if hasattr(config_module, 'UPCOMING_DAYS'):
+            config['UPCOMING_DAYS'] = config_module.UPCOMING_DAYS
+        if hasattr(config_module, 'NOTIFY_HOURLY'):
+            config['NOTIFY_HOURLY'] = config_module.NOTIFY_HOURLY
+        if hasattr(config_module, 'REQUEST_DELAY'):
+            config['REQUEST_DELAY'] = config_module.REQUEST_DELAY
+        if hasattr(config_module, 'TIMEOUT'):
+            config['TIMEOUT'] = config_module.TIMEOUT
         
         logger.info("✅ Konfiguration aus config.py geladen")
         
