@@ -60,9 +60,12 @@ def load_config():
         import config
         
         # Lade Werte aus config.py
-        for key in config.keys():
-            if hasattr(config_module := config, key):
-                config[key] = getattr(config_module, key)
+        config_vars = ['TELEGRAM_BOT_TOKEN', 'TELEGRAM_CHAT_ID', 'DOCTORS', 
+                      'UPCOMING_DAYS', 'NOTIFY_HOURLY', 'REQUEST_DELAY', 'TIMEOUT']
+        
+        for key in config_vars:
+            if hasattr(config, key):
+                config[key] = getattr(config, key)
         
         logger.info("✅ Konfiguration aus config.py geladen")
         
