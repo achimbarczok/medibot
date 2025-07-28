@@ -6,8 +6,8 @@ set -e  # Exit on error
 echo "🚀 Medibot Server Deployment"
 echo "============================"
 
-# Configuration - ANPASSEN AN DEINEN GITHUB USERNAME!
-REPO_URL="https://github.com/achimbarczok/medibot.git"  # ← HIER DEINEN USERNAME EINTRAGEN
+# Configuration
+REPO_URL="https://github.com/achimbarczok/medibot.git"
 APP_DIR="/opt/medibot"
 SERVICE_NAME="medibot"
 

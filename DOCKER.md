@@ -7,10 +7,10 @@ Medibot kann einfach als Docker Container auf deinem vServer deployed werden.
 ### Ein-Kommando Installation:
 ```bash
 # Lade und führe das Deployment-Script aus
-curl -sSL https://raw.githubusercontent.com/DEIN-USERNAME/medibot/main/deploy.sh | sudo bash
+curl -sSL https://raw.githubusercontent.com/achimbarczok/medibot/main/deploy.sh | sudo bash
 
 # Oder manuell:
-wget https://raw.githubusercontent.com/DEIN-USERNAME/medibot/main/deploy.sh
+wget https://raw.githubusercontent.com/achimbarczok/medibot/main/deploy.sh
 chmod +x deploy.sh
 sudo ./deploy.sh
 ```
@@ -107,7 +107,7 @@ Falls du das Deployment-Script nicht verwenden möchtest:
 
 ### 1. Repository klonen:
 ```bash
-git clone https://github.com/DEIN-USERNAME/medibot.git /opt/medibot
+git clone https://github.com/achimbarczok/medibot.git /opt/medibot
 cd /opt/medibot
 ```
 

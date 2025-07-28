@@ -18,10 +18,28 @@ Automatische Überwachung von Doctolib-Arztterminen mit sofortigen Telegram-Bena
 
 ## 🚀 Quick Start
 
-### 1. Repository klonen
+### 🐳 Docker Deployment (empfohlen für Server)
+
+**Ein-Kommando Installation auf vServer:**
+```bash
+curl -sSL https://raw.githubusercontent.com/achimbarczok/medibot/main/deploy.sh | sudo bash
+```
+
+Danach:
+```bash
+medibot config  # Konfiguration bearbeiten
+medibot restart # Container neustarten
+medibot logs    # Logs anzeigen
+```
+
+👉 **Vollständige Docker-Anleitung:** [DOCKER.md](DOCKER.md)
+
+### 💻 Lokale Installation
+
+#### 1. Repository klonen
 
 ```bash
-git clone https://github.com/DEIN-USERNAME/medibot.git
+git clone https://github.com/achimbarczok/medibot.git
 cd medibot
 ```
 
