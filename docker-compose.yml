@@ -1,0 +1,55 @@
+version: '3.8'
+
+services:
+  medibot:
+    build: .
+    container_name: medibot
+    restart: unless-stopped
+    
+    # Volumes für persistente Daten
+    volumes:
+      - ./config.py:/app/config.py:ro  # Read-only config
+      - ./logs:/app/logs               # Persistent logs
+      - /etc/localtime:/etc/localtime:ro  # Host timezone
+    
+    # Environment Variables (optional, falls du Secrets nutzen willst)
+    environment:
+      - TZ=Europe/Berlin
+      # Optional: Telegram Credentials über Environment
+      # - TELEGRAM_BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
+      # - TELEGRAM_CHAT_ID=${TELEGRAM_CHAT_ID}
+    
+    # Ressourcen-Limits (anpassen je nach vServer)
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+          cpus: '0.25'
+        reservations:
+          memory: 64M
+          cpus: '0.1'
+    
+    # Logging
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+    
+    # Network (falls du mehrere Container hast)
+    networks:
+      - medibot-network
+    
+    # Labels für Management
+    labels:
+      - "com.medibot.description=Doctolib Appointment Notifier"
+      - "com.medibot.version=1.0"
+
+networks:
+  medibot-network:
+    driver: bridge
+
+# Optional: Wenn du später Monitoring hinzufügen willst
+# volumes:
+#   prometheus_data:
+#   grafana_data:
