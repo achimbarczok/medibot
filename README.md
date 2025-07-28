@@ -1,161 +1,214 @@
-# Der BergdoktorBot – A Doctolib doctor's appointment Telegram notifier
+# Medibot 🤖
 
-![Der BergdoktorBot banner](images/Der_Bergdoktor_banner_with_working_title_and_project_description.jpg)
+**Multi-Arzt Doctolib Termin-Benachrichtigungsbot für Telegram**
 
-Get Telegram notifications about the most recent doctor's appointments on [doctolib.de](https://www.doctolib.de/). This script will notify you **every minute** as long as appointments exist within the next `UPCOMING_DAYS`. The next appointment outside of that threshold is additionally notified **on the hour**.
+Automatische Überwachung von Doctolib-Arztterminen mit sofortigen Telegram-Benachrichtigungen bei verfügbaren Terminen.
 
-ℹ️ 🔒 🔧 Remember that this static script does not know anything about your doctolib details behind your login so you have to **monitor** and **adjust** it on the go to reduce unwanted notifications.
+![Python](https://img.shields.io/badge/python-v3.6+-blue.svg)
+![License](https://img.shields.io/badge/license-MIT-green.svg)
 
-## Setup
+## ✨ Features
 
-### Telegram
+- 🔍 **Multi-Arzt Support**: Überwacht mehrere Ärzte gleichzeitig
+- 📱 **Telegram-Benachrichtigungen**: Sofortige Push-Nachrichten auf dein Handy
+- 🖥️ **Server-optimiert**: Läuft stabil via Cronjob auf Linux-Servern
+- 📊 **Detaillierte Logs**: Vollständige Protokollierung aller Aktivitäten
+- ⚡ **Rate-Limiting**: Schont Server mit konfigurierbaren Pausen
+- 🛡️ **Fehlerbehandlung**: Robuste Behandlung von Netzwerk- und API-Fehlern
 
-The setup follows these [instructions](https://sarafian.github.io/low-code/2020/03/24/create-private-telegram-chatbot.html). For simplicity I tried to compress it even more in the following step by step list:
+## 🚀 Quick Start
 
-1. **Create** a Telegram bot using [@botfather](https://web.telegram.org/k/#@BotFather) ([FAQ](https://core.telegram.org/bots/faq)).
-   - Username: `@<NAME>Bot`
-   - Disable `Allow Groups?`
-   - Turn on `Group Privacy`
-   
-   The bot `Token` will be available once the bot is created.
-   <br>Write it down, you'll need it in a later step.
-2. **Create** a **private** group. Overyone in the group will see the messages from your bot.
-   - Group name: `MyPrivateGroup`
-   - Group Type: `private`
-   
-   Warning: **Do not** edit special permissions for users as this will [convert the group into a supergroup](https://stackoverflow.com/a/62291433) which **does not work** with this code.
-3. Temporarily **enable** `Allow Groups?` on the bot.
-4. **Add** the bot to the group.
-5. Immediately **deactivate** `Allow Groups?` on the bot after adding it to the group.
-6. **Post** a test message into the group via the app or the browser (required to get the next step running).
-   Start message with `/` in order for the bot to be able to read it (`Group Privacy` is turned on by default).
-7. **Retrieve** group `chat_id` by visiting `https://api.telegram.org/bot<BOT_TOKEN>/getUpdates` in the browser.
-   <br>Write it down, you'll need it in a later step.
-8. Let the bot **send** a test message via visiting `https://api.telegram.org/bot<BOT_TOKEN>/sendMessage?chat_id=<GROUP_CHAT_ID>&text=Test` in the browser.
-   <br>The message should appear in the group chat.
-
-### Script
-
-1. Insert the bot `Token` into the constant `TELEGRAM_BOT_TOKEN`
-1. Insert the `chat_id` into the constant `TELEGRAM_CHAT_ID`
-
-You do **not** have to be signed in to doctolib.de in order to do do the next steps that will get your search query.
-
-1. Navigate to [doctolib.de](https://www.doctolib.de/)
-2. Use the search mask to find a doctor you want to make an appointment at and hit `search`
-3. Once your on the doctor's landing page open your browsers `dev tools`, select the `Network` tab and leave it open for the next steps
-4. Click on `TERMIN BUCHEN`
-5. Answer the following questions in the appointment wizard until you reach the date overview that says `Wählen Sie das Datum für den Termin`
-6. Copy the **URL of the browser** into the constant `BOOKING_URL`
-6. Select the filter `Fetch/XHR` within the `Network` tab in order to make it easier to find the correct request URL
-7. Look for a request to `availabilities.json…` and click on it in the list of requests
-8. Copy the value of the `Request URL` in the detail view and paste it into the constant `AVAILABILITIES_URL`
-
-### Cron
-
-First of all the script has to be made executable.
+### 1. Repository klonen
 
 ```bash
-chmod +x /path/to/notifyDoctolibDoctorsAppointment.py
+git clone https://github.com/DEIN-USERNAME/medibot.git
+cd medibot
 ```
 
-Next, schedule the script execution via the cron.
+### 2. Telegram Bot einrichten
+
+1. **Bot erstellen**:
+   - Starte Chat mit [@BotFather](https://t.me/botfather)
+   - Sende `/newbot` und folge den Anweisungen
+   - Speichere den **Bot Token**
+
+2. **Telegram-Gruppe erstellen**:
+   - Erstelle private Telegram-Gruppe
+   - Füge Bot zur Gruppe hinzu (temporär "Allow Groups" aktivieren)
+   - Sende Testnachricht mit `/test`
+
+3. **Chat-ID ermitteln**:
+   - Besuche: `https://api.telegram.org/bot<TOKEN>/getUpdates`
+   - Suche nach `"chat":{"id":-XXXXXXX}`
+   - Kopiere die negative Zahl
+
+### 3. Doctolib URLs sammeln
+
+Für jeden Arzt den du überwachen willst:
+
+1. Gehe zu [doctolib.de](https://www.doctolib.de/) und suche den Arzt
+2. Klicke "Termin buchen"
+3. Öffne Browser Developer Tools (F12) → Network Tab
+4. Starte Terminbuchung aber **buche nicht wirklich**
+5. Kopiere Browser-URL → `booking_url`
+6. Finde `availabilities.json` Request → kopiere Request-URL → `availabilities_url`
+
+### 4. Konfiguration
+
+Bearbeite `medibot.py` und trage deine Daten ein:
+
+```python
+# Telegram Konfiguration
+TELEGRAM_BOT_TOKEN = 'dein_bot_token_hier'
+TELEGRAM_CHAT_ID = 'deine_chat_id_hier'  # negative Zahl!
+
+# Ärzte hinzufügen
+DOCTORS = [
+    {
+        'name': 'Dr. Müller (Hausarzt)',
+        'booking_url': 'https://www.doctolib.de/hausarzt/berlin/dr-mueller',
+        'availabilities_url': 'https://www.doctolib.de/availabilities.json?visit_motive_ids=123456&agenda_ids=789&practice_ids=456&insurance_sector=public&limit=5',
+        'move_booking_url': None  # Optional: Termin verschieben URL
+    },
+    # Weitere Ärzte...
+]
+```
+
+### 5. Testen
+
+```bash
+python3 medibot.py
+```
+
+### 6. Cronjob einrichten
 
 ```bash
 crontab -e
 ```
 
-E.g. this cron entry will run it every minute from 7:00 AM to 23:59 PM.
+Füge hinzu (Beispiel: alle 10 Minuten):
+```bash
+*/10 * * * * /usr/bin/python3 /pfad/zu/medibot/medibot.py
+```
+
+## ⚙️ Konfiguration
+
+### Telegram Settings
+- `TELEGRAM_BOT_TOKEN`: Bot Token von @BotFather
+- `TELEGRAM_CHAT_ID`: Chat-ID deiner privaten Gruppe (negativ!)
+
+### Ärzte-Konfiguration
+Jeder Arzt in der `DOCTORS` Liste braucht:
+- `name`: Anzeigename (optional)
+- `booking_url`: Doctolib Buchungsseite
+- `availabilities_url`: API URL aus Browser Dev Tools (**wichtig!**)
+- `move_booking_url`: Termin verschieben URL (optional)
+
+### Zeiteinstellungen
+- `UPCOMING_DAYS`: Tage vorausschauen (max 15, Doctolib Limit)
+- `NOTIFY_HOURLY`: Auch Updates für spätere Termine (false empfohlen)
+- `REQUEST_DELAY`: Sekunden zwischen Arzt-Anfragen (3 empfohlen)
+- `TIMEOUT`: HTTP Timeout (30 Sekunden)
+
+## 📊 Monitoring
+
+### Logs anschauen
+```bash
+tail -f medibot.log
+```
+
+### Letzten Durchlauf prüfen
+```bash
+grep "Medibot erfolgreich beendet" medibot.log | tail -1
+```
+
+### Erfolgreiche Benachrichtigungen zählen
+```bash
+grep "erfolgreich gesendet" medibot.log | wc -l
+```
+
+## 🕐 Cronjob Beispiele
 
 ```bash
-* 7-23 * * * python /path/to/notifyDoctolibDoctorsAppointment.py
+# Alle 10 Minuten (empfohlen)
+*/10 * * * * /usr/bin/python3 /opt/medibot/medibot.py
+
+# Alle 5 Minuten (aggressiv)
+*/5 * * * * /usr/bin/python3 /opt/medibot/medibot.py
+
+# Nur tagsüber (7-22 Uhr)
+*/10 7-22 * * * /usr/bin/python3 /opt/medibot/medibot.py
+
+# Nur werktags (Mo-Fr, 8-18 Uhr)
+*/15 8-18 * * 1-5 /usr/bin/python3 /opt/medibot/medibot.py
 ```
 
-## Settings
+## ⚠️ Wichtige Hinweise
 
-Adjust those constants to get the most out of your notifications.
+### Rechtlich
+- **Nutzung auf eigenes Risiko** - könnte gegen Doctolib AGB verstoßen
+- Script greift nur auf öffentlich verfügbare Daten zu
+- Keine Garantie für dauerhaftes Funktionieren
 
-### TELEGRAM_BOT_TOKEN
+### Ethisch
+- Verwende das Script **sparsam** (nicht zu häufige Anfragen)
+- Server-Ressourcen schonen mit angemessenen Pausen
+- Bei Problemen Script sofort stoppen
 
-Paste your Telegram bot `Token` in this constant.
+### Technisch
+- Doctolib kann URLs/API jederzeit ändern
+- `availabilities_url` ist das Herzstück - muss regelmäßig aktualisiert werden
+- Bei 403/429 Fehlern: längere Pausen einbauen
 
-⚠️ The script will abort if you don't provide this data.
+## 🛠️ Troubleshooting
 
-Type `str`.
+### "❌ Telegram-Konfiguration fehlt!"
+- Bot Token und Chat-ID korrekt eingetragen?
+- Chat-ID muss negative Zahl sein (mit `-`)
 
-Default `''`.
+### "❌ HTTP Fehler 403"
+- Availabilities URL ist abgelaufen
+- Neue URL über Browser Dev Tools ermitteln
+- User-Agent im Code eventuell anpassen
 
-### TELEGRAM_CHAT_ID
+### Keine Benachrichtigungen
+- Script läuft ohne Fehler aber findet keine Termine → Normal!
+- Teste mit einem Arzt der verfügbare Termine hat
+- Prüfe Log-Ausgabe auf Fehler
 
-Paste your Telegram `chat_id` in this constant.
+### Bot antwortet nicht
+- Bot Token korrekt?
+- Bot zur Gruppe hinzugefügt?
+- "Allow Groups" nach Hinzufügung wieder deaktiviert?
 
-⚠️ The script will abort if you don't provide this data.
+## 📈 Statistiken
 
-Type `str`.
+Das Script protokolliert automatisch:
+- Anzahl geprüfter Ärzte pro Durchlauf
+- Gefundene Termine pro Arzt
+- Gesendete Benachrichtigungen
+- Fehler und deren Ursachen
 
-Default `''`.
+## 🤝 Contributing
 
-### BOOKING_URL
+1. Fork das Repository
+2. Erstelle Feature Branch (`git checkout -b feature/AmazingFeature`)
+3. Commit deine Änderungen (`git commit -m 'Add some AmazingFeature'`)
+4. Push zum Branch (`git push origin feature/AmazingFeature`)
+5. Öffne einen Pull Request
 
-Paste your doctolib booking URL in this constant. The Telegram message will contain a link to this page in case of available appointments.
+## 📄 Lizenz
 
-Type `str`.
+Dieses Projekt steht unter der MIT Lizenz - siehe [LICENSE.md](LICENSE.md) für Details.
 
-Default `https://www.doctolib.de/`.
+## 🙏 Credits
 
-### AVAILABILITIES_URL
+**Original:** Basiert auf dem [Der Bergdoktorbot](https://github.com/mayrs/der-bergdoktorbot-a-doctolib-doctors-appointment-telegram-notifier) von [mayrs](https://github.com/mayrs).
 
-Paste the complete URL to the Doctolib `availabilities.json` (including parameters) in this constant.
+**Entwicklung:** Erweitert um Multi-Arzt Support, Logging und Server-Optimierungen mit Unterstützung von [Claude (Anthropic)](https://claude.ai).
 
-⚠️ The script will abort if you don't provide this data.
+**Transparenz:** Dieses Projekt wurde unter Verwendung von KI-Assistenz entwickelt. Der Code wurde gemeinsam mit Claude erstellt, überprüft und optimiert, um eine robuste und benutzerfreundliche Lösung zu gewährleisten.
 
-Type `str`.
+---
 
-Default `''`.
-
-### APPOINTMENT_NAME
-
-If you have multiple instances of the script running and share the same Telegram channel it's a good idea to make notifications allocatable.
-
-Type `str|None`.
-
-Default `None`.
-
-### MOVE_BOOKING_URL
-
-Provide a link to your `Termin verschieben` page behind your login to navigate fastest to the booking page and move the appointment in one go. When set, an extra link will be sent in addition to the `BOOKING_URL` link.
-
-Type `str|None`.
-
-Default `None`.
-
-### UPCOMING_DAYS
-
-Paste the number of days from today, that you want to monitor appointments for, in this constant.
-
-ℹ️ Doctolib has a limit of 15 days.
-
-Type `int`.
-
-Default `15`.
-
-### MAX_DATETIME_IN_FUTURE
-
-If you already have an appointment within the next `UPCOMING_DAYS` you can set this date in this constant so that the script only notifies for **earlier dates**.
-
-E.g.
-```python
-MAX_DATETIME_IN_FUTURE = datetime(2023, 6, 16, 12, 0, 0)
-```
-
-Type `datetime`.
-
-Default `15 days in the future`.
-
-### NOTIFY_HOURLY
-
-Whether to notify late appointments (outside of the `UPCOMING_DAYS` range) hourly.
-
-Type `bool`.
-
-Default `False`.
+**⚠️ Disclaimer**: Dieses Tool ist für Bildungszwecke gedacht. Die Nutzung erfolgt auf eigenes Risiko. Der Autor übernimmt keine Haftung für Schäden oder Verstöße gegen Nutzungsbedingungen.

@@ -1,0 +1,25 @@
+# =============================================================================
+# MEDIBOT KONFIGURATION
+# Diese Datei wird von medibot.py automatisch geladen falls vorhanden
+# =============================================================================
+
+# 🤖 TELEGRAM KONFIGURATION
+TELEGRAM_BOT_TOKEN = ''  # Von @BotFather
+TELEGRAM_CHAT_ID = ''    # Chat-ID (negative Zahl!)
+
+# 👨‍⚕️ ÄRZTE KONFIGURATION
+DOCTORS = [
+    {
+        'name': 'Dr. Beispiel (Hausarzt)',
+        'booking_url': 'https://www.doctolib.de/',
+        'availabilities_url': '',  # Wichtig: Die availabilities.json URL
+        'move_booking_url': None
+    },
+    # Weitere Ärzte hier hinzufügen...
+]
+
+# ⚙️ ERWEITERTE EINSTELLUNGEN
+UPCOMING_DAYS = 15        # Tage vorausschauen (max 15)
+NOTIFY_HOURLY = False     # Stündliche Updates für spätere Termine
+REQUEST_DELAY = 3         # Sekunden zwischen Arzt-Anfragen
+TIMEOUT = 30             # HTTP Timeout in Sekunden
